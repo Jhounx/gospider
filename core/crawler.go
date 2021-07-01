@@ -310,7 +310,7 @@ func NewCrawler(site *url.URL, cmd *cobra.Command) *Crawler {
 func (crawler *Crawler) feedLinkfinder(jsFileUrl string, OutputType string, source string, ) {
 
 	if !crawler.jsSet.Duplicate(jsFileUrl) {
-		outputFormat := fmt.Sprintf("[%s] - %s", OutputType, jsFileUrl)
+		outputFormat := fmt.Sprintf("%s", jsFileUrl)
 
 		if crawler.JsonOutput {
 			sout := SpiderOutput{
@@ -358,7 +358,7 @@ func (crawler *Crawler) Start(linkfinder bool) {
 			return
 		}
 		if !crawler.urlSet.Duplicate(urlString) {
-			outputFormat := fmt.Sprintf("[href] - %s", urlString)
+			outputFormat := fmt.Sprintf("%s", urlString)
 			if crawler.JsonOutput {
 			sout := SpiderOutput{
 				Input:      crawler.Input,
@@ -384,7 +384,7 @@ func (crawler *Crawler) Start(linkfinder bool) {
 	crawler.C.OnHTML("form[action]", func(e *colly.HTMLElement) {
 		formUrl := e.Request.URL.String()
 		if !crawler.formSet.Duplicate(formUrl) {
-			outputFormat := fmt.Sprintf("[form] - %s", formUrl)
+			outputFormat := fmt.Sprintf("%s", formUrl)
 			if crawler.JsonOutput {
 				sout := SpiderOutput{
 					Input:      crawler.Input,
@@ -411,7 +411,7 @@ func (crawler *Crawler) Start(linkfinder bool) {
 	crawler.C.OnHTML(`input[type="file"]`, func(e *colly.HTMLElement) {
 		uploadUrl := e.Request.URL.String()
 		if !uploadFormSet.Duplicate(uploadUrl) {
-			outputFormat := fmt.Sprintf("[upload-form] - %s", uploadUrl)
+			outputFormat := fmt.Sprintf("%s", uploadUrl)
 			if crawler.JsonOutput {
 				sout := SpiderOutput{
 					Input:      crawler.Input,
@@ -454,10 +454,10 @@ func (crawler *Crawler) Start(linkfinder bool) {
 
 			// Verify which link is working
 			u := response.Request.URL.String()
-			outputFormat := fmt.Sprintf("[url] - [code-%d] - %s", response.StatusCode, u)
+			outputFormat := fmt.Sprintf("%s", u)
 
 			if crawler.length {
-				outputFormat = fmt.Sprintf("[url] - [code-%d] - [len_%d] - %s", response.StatusCode, len(respStr), u)
+				outputFormat = fmt.Sprintf("%s", u)
 			}
 
 			if crawler.JsonOutput {
@@ -485,7 +485,7 @@ func (crawler *Crawler) Start(linkfinder bool) {
 			}
 
 			if crawler.raw { 
-				outputFormat := fmt.Sprintf("[Raw] - \n%s\n", respStr)  //PRINTCLEAN RAW for link visited only
+				outputFormat := fmt.Sprintf("%s\n", respStr)  //PRINTCLEAN RAW for link visited only
 				if !crawler.Quiet { 
 					fmt.Println(outputFormat)
 				}
@@ -510,7 +510,7 @@ func (crawler *Crawler) Start(linkfinder bool) {
 		}
 
 		u := response.Request.URL.String()
-		outputFormat := fmt.Sprintf("[url] - [code-%d] - %s", response.StatusCode, u)
+		outputFormat := fmt.Sprintf("%s",  u)
 
 		if crawler.JsonOutput {
 			sout := SpiderOutput{
@@ -547,7 +547,7 @@ func (crawler *Crawler) findSubdomains(resp string) {
 	subs := GetSubdomains(resp, crawler.domain)
 	for _, sub := range subs {
 		if !crawler.subSet.Duplicate(sub) {
-			outputFormat := fmt.Sprintf("[subdomains] - %s", sub)
+			outputFormat := fmt.Sprintf("%s", sub)
 
 			if crawler.JsonOutput {
 				sout := SpiderOutput{
@@ -561,9 +561,9 @@ func (crawler *Crawler) findSubdomains(resp string) {
 				}
 				fmt.Println(outputFormat)
 			} else if !crawler.Quiet {
-				outputFormat = fmt.Sprintf("[subdomains] - http://%s", sub)
+				outputFormat = fmt.Sprintf("http://%s", sub)
 				fmt.Println(outputFormat)
-				outputFormat = fmt.Sprintf("[subdomains] - https://%s", sub)
+				outputFormat = fmt.Sprintf("https://%s", sub)
 				fmt.Println(outputFormat)
 			}
 			if crawler.Output != nil {
@@ -578,7 +578,7 @@ func (crawler *Crawler) findAWSS3(resp string) {
 	aws := GetAWSS3(resp)
 	for _, e := range aws {
 		if !crawler.awsSet.Duplicate(e) {
-			outputFormat := fmt.Sprintf("[aws-s3] - %s", e)
+			outputFormat := fmt.Sprintf("%s", e)
 			if crawler.JsonOutput {
 				sout := SpiderOutput{
 					Input:      crawler.Input,
@@ -611,10 +611,10 @@ func (crawler *Crawler) setupLinkFinder() {
 
 			// Verify which link is working
 			u := response.Request.URL.String()
-			outputFormat := fmt.Sprintf("[url] - [code-%d] - %s", response.StatusCode, u)
+			outputFormat := fmt.Sprintf("%s", u)
 
 			if crawler.length {
-				outputFormat = fmt.Sprintf("[url] - [code-%d] - [len_%d] - %s", response.StatusCode, len(respStr), u)
+				outputFormat = fmt.Sprintf("%s", u)
 			}
 			fmt.Println(outputFormat)
 
@@ -652,9 +652,7 @@ func (crawler *Crawler) setupLinkFinder() {
 						if data, err := jsoniter.MarshalToString(sout); err == nil {
 							outputFormat = data
 						}
-					} else if !crawler.Quiet {
-						outputFormat = fmt.Sprintf("[linkfinder] - [from: %s] - %s", response.Request.URL.String(), relPath)
-					}
+					} 
 					fmt.Println(outputFormat)
 
 					if crawler.Output != nil {
@@ -690,7 +688,7 @@ func (crawler *Crawler) setupLinkFinder() {
 								outputFormat = data
 							}
 						} else if !crawler.Quiet{
-							outputFormat = fmt.Sprintf("[linkfinder] - %s", rebuildURL)
+							outputFormat = fmt.Sprintf("%s", rebuildURL)
 						}
 
 						fmt.Println(outputFormat)
@@ -724,7 +722,7 @@ func (crawler *Crawler) setupLinkFinder() {
 										outputFormat = data
 									}
 								} else if !crawler.Quiet{
-									outputFormat = fmt.Sprintf("[linkfinder] - %s", urlWithJSHostIn)
+									outputFormat = fmt.Sprintf("%s", urlWithJSHostIn)
 								}
 								fmt.Println(outputFormat)
 
@@ -741,7 +739,7 @@ func (crawler *Crawler) setupLinkFinder() {
 				
 				if crawler.raw{ 
 
-					outputFormat := fmt.Sprintf("[Raw] - \n%s\n", respStr)  //PRINTCLEAN RAW for link visited only
+					outputFormat := fmt.Sprintf("%s\n", respStr)  //PRINTCLEAN RAW for link visited only
 					if !crawler.Quiet { 
 						fmt.Println(outputFormat)
 					}
